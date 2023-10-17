@@ -1,0 +1,11 @@
+__pycache__/
+venv/
+*.env
+
+.vscode/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
