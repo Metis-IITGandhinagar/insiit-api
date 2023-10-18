@@ -40,7 +40,10 @@ CMD ["python", "main.py"]
 ```
 
 \
-Next, create a new `docker-compose.yml` file in the root of the repository, and insert the following piece of code in it:
+Next, create a new `.env` file in the repository root, and add the required environment variables to it.
+
+\
+Then, create a new `docker-compose.yml` file in the root of the repository, and insert the following piece of code in it:
 
 ```yml
 services:
