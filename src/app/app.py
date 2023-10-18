@@ -21,7 +21,7 @@ app = create_app()
 
 @app.get("/")
 async def root(api_key: APIKey = Depends(get_api_key)):
-    return {"message": "hello world"}
+    return {"message": "Hello from InsIIT!"}
 
 
 from app.routes import outletRoutes

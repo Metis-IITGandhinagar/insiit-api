@@ -5,7 +5,7 @@ load_dotenv()
 
 
 def get_config():
-    config = {
+    app_config = {
         "api": {
             "port": int(os.getenv("PORT")),
             "api-keys": eval(os.getenv("API_KEYS")),
@@ -19,7 +19,7 @@ def get_config():
         },
     }
 
-    return config
+    return app_config
 
 
 config = get_config()
