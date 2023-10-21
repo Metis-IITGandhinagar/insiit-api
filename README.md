@@ -28,7 +28,7 @@ Follow the instructions [here](https://github.com/WADC-IITGN/insiit-db#setting-u
 
 ### Running the API
 
-Every time before starting the API, you will have to start the database, the instructions to which can be found [here](https://github.com/WADC-IITGN/insiit-db#setting-up-the-database-on-a-new-machine)
+Every time before starting the API, you will have to start the database, the instructions to which can be found [here](https://github.com/WADC-IITGN/insiit-db#running-the-database).
 
 Then, open a terminal in the root of the repository and run the following command:
 
