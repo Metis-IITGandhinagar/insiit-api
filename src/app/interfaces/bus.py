@@ -1,8 +1,6 @@
 from fastapi import HTTPException, status
 from typing import Optional, List
 from datetime import time
-from app.interfaces.common import Location
-from appTypes.outletTypes import Rating  # You may need to adjust imports
 import psycopg2
 import psycopg2.extensions
 import geopy.distance
