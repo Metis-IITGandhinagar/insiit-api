@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    container_name: insiit-api
+    command: python main.py
+    ports:
+      - 8000:8000
+    environment:
+      - DB_HOST=localhost
+      - DB_PORT=5050
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=insiit
+      - API_PORT=8000
+      - API_KEYS=["D4tuaQYa1m2pqpILHOND4KSauRFMvbaU"]
+    volumes:
+      - ./src:/code
