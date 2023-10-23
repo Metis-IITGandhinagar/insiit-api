@@ -1,10 +1,13 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_config():
     app_config = {
         "api": {
-            "port": int(os.getenv("API_PORT")),
+            "port": int(os.getenv("PORT")),
             "api-keys": eval(os.getenv("API_KEYS")),
         },
         "db": {
