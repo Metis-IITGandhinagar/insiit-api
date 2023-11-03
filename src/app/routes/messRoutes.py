@@ -14,7 +14,7 @@ from appTypes.messTypes import (
     NewMessMenuItemBodyParams,
     UpdateMessMenuItemBodyParams,
 )
-from typing import Optional
+from typing import Optional, Literal
 
 
 @app.get("/mess", summary="Get Details of All Messes on the Campus", tags=["Mess"])
@@ -170,7 +170,12 @@ async def get_current_mess_menu_details(id: int):
     summary="Get the Current Menu of a particular Day of any Mess by ID",
     tags=["Mess"],
 )
-async def get_current_mess_menu_details_byDay(id: int, day: int):
+async def get_current_mess_menu_details_byDay(
+    id: int,
+    day: Literal[
+        "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
+    ],
+):
     con = connect()
 
     mess = Mess(id=id)
@@ -184,32 +189,7 @@ async def get_current_mess_menu_details_byDay(id: int, day: int):
     if menu is None:
         return {"menu": None}
 
-    menu_today = {
-        "breakfast": [],
-        "lunch": [],
-        "snacks": [],
-        "dinner": [],
-    }
-
-    for item in menu.breakfast:
-        if item["day"] == day:
-            menu_today["breakfast"] = item["food"]
-            break
-
-    for item in menu.lunch:
-        if item["day"] == day:
-            menu_today["lunch"] = item["food"]
-            break
-
-    for item in menu.snacks:
-        if item["day"] == day:
-            menu_today["snacks"] = item["food"]
-            break
-
-    for item in menu.dinner:
-        if item["day"] == day:
-            menu_today["dinner"] = item["food"]
-            break
+    menu_today = getattr(menu, day)
 
     return {"menu": menu_today}
 

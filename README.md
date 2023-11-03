@@ -46,6 +46,9 @@ insiit-api  | INFO:     Application startup complete.
 ```
 
 \
+If you wish to open VS Code in the container, first install the **Docker** Extension. Then, click on the remote connection button in the bottom left extreme. Click on "Attach to Running Container...", and select "/insiit-api".
+
+\
 To stop a container that is already running in your terminal, press CTRL+C to exit out of the container. Then, run the following command:
 
 ```bash
