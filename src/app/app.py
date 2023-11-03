@@ -58,7 +58,9 @@ class HelloWorldResponseModel(BaseModel):
     response_model=HelloWorldResponseModel,
 )
 async def root():
-    return {"message": "Hello from InsIIT!"}
+    return {
+        "message": "Hello from InsIIT! Visit /api/v1/docs to view the API documentation."
+    }
 
 
 @app.get("/api/v1/docs", include_in_schema=False)
