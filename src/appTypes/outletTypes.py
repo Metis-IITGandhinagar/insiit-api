@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple, Any
 from typing_extensions import TypedDict
-from app.interfaces.common import Rating, Location
+from app.interfaces.common import Location
 from datetime import time
 from pydantic import BaseModel
 
@@ -9,7 +9,7 @@ class FoodOutletMenuItem(TypedDict):
     name: str
     price: int
     description: Optional[str]
-    rating: Optional[Rating]
+    rating: Optional[float]
     size: Optional[str]
     cal: Optional[int]
     image: Optional[str]
@@ -26,7 +26,7 @@ class FoodOutletDetails(TypedDict):
     landmark: Optional[str]
     open_time: Optional[time]
     close_time: Optional[time]
-    rating: Optional[Rating]
+    rating: Optional[float]
     menu: Optional[FoodOutletMenu]
     image: Optional[str]
 

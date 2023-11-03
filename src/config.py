@@ -1,14 +1,12 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 def get_config():
     app_config = {
         "api": {
-            "port": int(os.getenv("PORT")),
+            "port": int(os.getenv("API_PORT")),
             "api-keys": eval(os.getenv("API_KEYS")),
+            "admin-api-key": os.getenv("ADMIN_API_KEY"),
         },
         "db": {
             "host": os.getenv("DB_HOST"),
@@ -25,3 +23,29 @@ def get_config():
 config = get_config()
 api_config = config["api"]
 db_config = config["db"]
+
+with open("./assets/app_description.md", "r") as f:
+    app_description = f.read()
+
+tags_metadata = [
+    {
+        "name": "Hello World!",
+        "description": "<font size='4'>Just a simple Hello World! endpoint</font>",
+    },
+    {
+        "name": "Mess",
+        "description": "<font size='4'>Endpoints related to Mess</font>",
+    },
+    {
+        "name": "Food Outlets",
+        "description": "<font size='4'>Endpoints related to Food Outlets</font>",
+    },
+    {
+        "name": "Mess - ADMIN",
+        "description": "<font size='4'>Admin endpoints related to Mess - POST, PUT, DELETE</font>",
+    },
+    {
+        "name": "Food Outlets - ADMIN",
+        "description": "<font size='4'>Admin endpoints related to Food Outlets - POST, PUT, DELETE</font>",
+    },
+]

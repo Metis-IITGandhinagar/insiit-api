@@ -24,39 +24,7 @@ If you get an error, please refer to the documentation [here](https://docs.docke
 
 Fork the repository and clone it on your computer.
 
-In the root of the repository, create a new `Dockerfile` file. Insert the following piece of code in the file you just created:
-
-```dockerfile
-FROM python:3.10-slim
-
-WORKDIR /code
-
-COPY ./requirements.txt ./
-RUN apt-get update && apt-get -y install libpq-dev gcc && pip install --no-cache-dir -r requirements.txt
-
-COPY ./src .
-
-CMD ["python", "main.py"]
-```
-
-\
-Next, create a new `.env` file in the repository root, and add the required environment variables to it.
-
-\
-Then, create a new `docker-compose.yml` file in the root of the repository, and insert the following piece of code in it:
-
-```yml
-services:
-  app:
-    build: .
-    container_name: insiit-api
-    command: python main.py
-    ports:
-      - 8000:8000
-    env_file: .env
-    volumes:
-      - ./src:/code
-```
+Next, create a new `.env` file in the repository root, and add the required environment variables to it. Please contact the repository maintainers for the environment variables.
 
 ### Running the API
 
