@@ -4,10 +4,6 @@ venv/
 
 .vscode/
 
-# Docker related
-Dockerfile
-docker-compose.yml
-
 # IntelliJ related
 *.iml
 *.ipr

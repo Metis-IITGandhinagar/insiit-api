@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    container_name: insiit-api
+    command: python main.py
+    ports:
+      - 8000:8000
+    env_file: .env
+    volumes:
+      - ./src:/code

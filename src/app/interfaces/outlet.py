@@ -1,5 +1,5 @@
 from typing import Optional, List
-from app.interfaces.common import Location, Rating
+from app.interfaces.common import Location
 from appTypes.outletTypes import FoodOutletMenu, FoodOutletDetails, FoodOutletDBValues
 from datetime import time
 from fastapi import HTTPException, status
@@ -17,7 +17,7 @@ class FoodOutletMenuItem:
         outlet_id: int | None = None,
         price: int | None = None,
         description: str | None = None,
-        rating: Rating | None = None,
+        rating: float | None = None,
         size: str | None = None,
         cal: int | None = None,
         image: str | None = None,
@@ -56,11 +56,7 @@ class FoodOutletMenuItem:
             self.name = result[1]
             self.price = result[2]
             self.description = result[3]
-            self.rating = (
-                Rating(total=result[4]["total"], count=result[4]["count"])
-                if result[4] is not None
-                else None
-            )
+            self.rating = result[4]
             self.size = result[5]
             self.cal = result[6]
             self.image = result[7]
@@ -73,12 +69,6 @@ class FoodOutletMenuItem:
     async def create(self, con: psycopg2.extensions.connection):
         cursor = con.cursor()
 
-        rating_value = (
-            {"total": self.rating.total, "count": self.rating.count}
-            if self.rating is not None
-            else None
-        )
-
         cursor.execute(
             "INSERT INTO food_outlet_menu_items (name, price, food_outlet_id, description, rating, size, cal, image) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
             (
@@ -86,7 +76,7 @@ class FoodOutletMenuItem:
                 self.price,
                 self.outlet_id,
                 self.description,
-                rating_value,
+                self.rating,
                 self.size,
                 self.cal,
                 self.image,
@@ -114,12 +104,6 @@ class FoodOutletMenuItem:
     async def update(self, con: psycopg2.extensions.connection):
         cursor = con.cursor()
 
-        rating_value = (
-            {"total": self.rating.total, "count": self.rating.count}
-            if self.rating is not None
-            else None
-        )
-
         cursor.execute(
             f"UPDATE food_outlet_menu_items SET name=%s, price=%s, food_outlet_id=%s, description=%s, rating=%s, size=%s, cal=%s, image=%s WHERE id={self.id}",
             (
@@ -127,7 +111,7 @@ class FoodOutletMenuItem:
                 self.price,
                 self.outlet_id,
                 self.description,
-                rating_value,
+                self.rating,
                 self.size,
                 self.cal,
                 self.image,
@@ -166,7 +150,7 @@ class FoodOutlet:
         landmark: Optional[str] = None,
         open_time: Optional[time] = None,
         close_time: Optional[time] = None,
-        rating: Optional[Rating] = None,
+        rating: Optional[float] = None,
         menu: Optional[List[FoodOutletMenuItem]] = None,
         image: Optional[str] = None,
     ):
@@ -207,11 +191,7 @@ class FoodOutlet:
             self.landmark = result[3]
             self.open_time = result[4]
             self.close_time = result[5]
-            self.rating = (
-                Rating(total=result[6]["total"], count=result[6]["count"])
-                if result[6] is not None
-                else None
-            )
+            self.rating = result[6]
 
             menu_ids = result[7] if result[7] is not None else []
             menu = []
@@ -244,12 +224,6 @@ class FoodOutlet:
             else None
         )
 
-        rating_value = (
-            str({"total": self.rating.total, "count": self.rating.count})
-            if self.rating is not None
-            else None
-        )
-
         menu_value = [item.id for item in self.menu] if self.menu is not None else None
 
         cursor.execute(
@@ -260,7 +234,7 @@ class FoodOutlet:
                 self.landmark,
                 self.open_time,
                 self.close_time,
-                rating_value,
+                self.rating,
                 menu_value,
                 self.image,
             ),
@@ -285,12 +259,6 @@ class FoodOutlet:
             else None
         )
 
-        rating_value = (
-            str({"total": self.rating.total, "count": self.rating.count})
-            if self.rating is not None
-            else None
-        )
-
         menu_value = [item.id for item in self.menu] if self.menu is not None else None
 
         cursor.execute(
@@ -301,7 +269,7 @@ class FoodOutlet:
                 self.landmark,
                 self.open_time,
                 self.close_time,
-                rating_value,
+                self.rating,
                 menu_value,
                 self.image,
             ),
@@ -322,7 +290,7 @@ async def searchOutlets(
     locationFilter: Optional[Location] = None,
     landmarkFilter: Optional[str] = None,
     timeFilter: Optional[time] = None,
-    ratingFilter: Optional[int] = None,
+    ratingFilter: Optional[float] = None,
     itemFilter: Optional[str] = None,
 ) -> List[FoodOutletDetails]:
     cursor = con.cursor()
@@ -411,11 +379,7 @@ async def searchOutlets(
             else (
                 False
                 if outlet.rating is None
-                else (
-                    True
-                    if (outlet.rating.total / outlet.rating.count) >= ratingFilter
-                    else False
-                )
+                else (True if outlet.rating >= ratingFilter else False)
             ),
             outlets,
         )

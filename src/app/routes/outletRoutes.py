@@ -8,7 +8,7 @@ from appTypes.outletTypes import (
 from app.app import app
 from app.db import connect, disconnect
 from app.interfaces.outlet import FoodOutlet, searchOutlets, FoodOutletMenuItem
-from app.interfaces.common import Location, Rating
+from app.interfaces.common import Location
 from app.auth.key import get_api_key
 from fastapi import Depends, status, HTTPException
 from fastapi.security.api_key import APIKey
@@ -16,10 +16,12 @@ from datetime import time
 from typing import Optional, List
 
 
-@app.get("/food-outlet")
-async def get_all_food_outlet_details(
-    api_key: APIKey = Depends(get_api_key),
-):
+@app.get(
+    "/food-outlet",
+    summary="Get Details of All Food Outlets on the Campus",
+    tags=["Food Outlets"],
+)
+async def get_all_food_outlet_details():
     con = connect()
     cursor = con.cursor()
 
@@ -28,8 +30,8 @@ async def get_all_food_outlet_details(
     ids = [row[0] for row in result]
     details = []
 
-    print(ids)
-
+    # print(ids)
+    cursor.close()
     for id in ids:
         outlet = FoodOutlet(id=id)
         await outlet.sync_details(con)
@@ -38,19 +40,11 @@ async def get_all_food_outlet_details(
         outlet_details["location"] = (
             outlet.location.__dict__ if outlet.location is not None else None
         )
-        outlet_details["rating"] = (
-            outlet.rating.__dict__ if outlet.rating is not None else None
-        )
+
         outlet_details["menu"] = (
             [item.__dict__ for item in outlet.menu] if outlet.menu is not None else None
         )
-        if outlet.menu is not None:
-            for i in range(len(outlet_details["menu"])):
-                outlet_details["menu"][i]["rating"] = (
-                    outlet.menu[i]["rating"].__dict__
-                    if outlet.menu[i]["rating"] is not None
-                    else None
-                )
+
         details.append(outlet_details)
 
     disconnect(con)
@@ -58,8 +52,12 @@ async def get_all_food_outlet_details(
     return {"outlets": details}
 
 
-@app.get("/food-outlet/{id}")
-async def get_food_outlet_details(id: int, api_key: APIKey = Depends(get_api_key)):
+@app.get(
+    "/food-outlet/{id}",
+    summary="Get Details of any Food Outlet by ID",
+    tags=["Food Outlets"],
+)
+async def get_food_outlet_details(id: int):
     con = connect()
 
     outlet = FoodOutlet(id=id)
@@ -70,26 +68,21 @@ async def get_food_outlet_details(id: int, api_key: APIKey = Depends(get_api_key
     details["location"] = (
         outlet.location.__dict__ if outlet.location is not None else None
     )
-    details["rating"] = outlet.rating.__dict__ if outlet.rating is not None else None
 
     details["menu"] = (
         [item.__dict__ for item in outlet.menu] if outlet.menu is not None else None
     )
-    if outlet.menu is not None:
-        for i in range(len(details["menu"])):
-            details["menu"][i]["rating"] = (
-                outlet.menu[i]["rating"].__dict__
-                if outlet.menu[i]["rating"] is not None
-                else None
-            )
 
     return {"outlet": details}
 
 
-@app.get("/search/food-outlet")
+@app.get(
+    "/search/food-outlet",
+    summary="Search for Food Outlets on the Campus",
+    tags=["Food Outlets"],
+)
 async def filter_food_outlets(
     params: FilterFoodOutletBodyParams,
-    api_key: APIKey = Depends(get_api_key),
 ):
     con = connect()
     outlets = await searchOutlets(
@@ -119,34 +112,28 @@ async def filter_food_outlets(
             if outlets[i]["location"] is not None
             else None
         )
-        outlets[i]["rating"] = (
-            outlets[i]["rating"].__dict__ if outlets[i]["rating"] is not None else None
-        )
+
         outlets[i]["menu"] = (
             [item.__dict__ for item in outlets[i]["menu"]]
             if outlets[i]["menu"] is not None
             else None
         )
-        if outlets[i]["menu"] is not None:
-            for j in range(len(outlets[i]["menu"])):
-                outlets[i]["menu"][j]["rating"] = (
-                    outlets[i]["menu"][j]["rating"].__dict__
-                    if outlets[i]["menu"][j]["rating"] is not None
-                    else None
-                )
 
     return {"outlets": outlets}
 
 
-@app.post("/food-outlet", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/food-outlet",
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a new Food Outlet",
+    tags=["Food Outlets - ADMIN"],
+)
 async def create_food_outlet(
     params: NewFoodOutletBodyParams, api_key: APIKey = Depends(get_api_key)
 ):
     params_dict = params.model_dump()
     if params_dict["location"] is not None:
         params_dict["location"] = Location(**params_dict["location"])
-    if params_dict["rating"] is not None:
-        params_dict["rating"] = Rating(**params_dict["rating"])
 
     for key, value in params_dict.items():
         if type(value) is str:
@@ -175,16 +162,19 @@ async def create_food_outlet(
     details["location"] = (
         details["location"].__dict__ if details["location"] is not None else None
     )
-    details["rating"] = (
-        details["rating"].__dict__ if details["rating"] is not None else None
-    )
 
     return {"outlet": details}
 
 
-@app.put("/food-outlet/{id}")
+@app.put(
+    "/food-outlet/{id}",
+    summary="Update Details of any Food Outlet by ID",
+    tags=["Food Outlets - ADMIN"],
+)
 async def update_food_outlet(
-    id: int, params: UpdateFoodOutletBodyParams, api_key: APIKey = Depends(get_api_key)
+    id: int,
+    params: UpdateFoodOutletBodyParams,
+    api_key: APIKey = Depends(get_api_key),
 ):
     con = connect()
     outlet = FoodOutlet(id=id)
@@ -194,8 +184,7 @@ async def update_food_outlet(
         if value is not None:
             if key == "location":
                 outlet.location = Location(**params_dict["location"])
-            elif key == "rating":
-                outlet.rating = Rating(**params_dict["rating"])
+
             else:
                 outlet.__setattr__(key, value.lower() if type(value) is str else value)
 
@@ -204,28 +193,23 @@ async def update_food_outlet(
     details["location"] = (
         details["location"].__dict__ if details["location"] is not None else None
     )
-    details["rating"] = (
-        details["rating"].__dict__ if details["rating"] is not None else None
-    )
+
     details["menu"] = (
         [item.__dict__ for item in details["menu"]]
         if details["menu"] is not None
         else None
     )
 
-    if details["menu"] is not None:
-        for i in range(len(details["menu"])):
-            details["menu"][i]["rating"] = (
-                outlet.menu[i].rating.__dict__
-                if outlet.menu[i].rating is not None
-                else None
-            )
-
     disconnect(con)
     return {"outlet": details}
 
 
-@app.delete("/food-outlet/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete(
+    "/food-outlet/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete any Food Outlet by ID",
+    tags=["Food Outlets - ADMIN"],
+)
 async def delete_food_outlet(id: int, api_key: APIKey = Depends(get_api_key)):
     con = connect()
     outlet = FoodOutlet(id=id)
@@ -239,7 +223,12 @@ async def delete_food_outlet(id: int, api_key: APIKey = Depends(get_api_key)):
     await outlet.remove(con)
 
 
-@app.post("/food-outlet/{id}/menu/food-item", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/food-outlet/{id}/menu/food-item",
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a new Menu Item to any Food Outlet by ID",
+    tags=["Food Outlets - ADMIN"],
+)
 async def add_menu_item_food_outlet(
     id: int,
     params: AddMenuItemFoodOutletBodyParams,
@@ -259,13 +248,7 @@ async def add_menu_item_food_outlet(
                 )
 
     params_dict = {
-        key: value.lower()
-        if type(value) is str
-        else (
-            Rating(total=value["total"], count=value["count"])
-            if key == "rating" and value is not None
-            else value
-        )
+        key: value.lower() if type(value) is str else value
         for key, value in params.model_dump().items()
     }
 
@@ -274,14 +257,14 @@ async def add_menu_item_food_outlet(
 
     disconnect(con)
 
-    item_details["rating"] = (
-        item_details["rating"].__dict__ if item_details["rating"] is not None else None
-    )
-
     return {"item": item_details}
 
 
-@app.put("/food-outlet/{id}/menu/food-item/{item_id}")
+@app.put(
+    "/food-outlet/{id}/menu/food-item/{item_id}",
+    summary="Update Details of any Menu Item of any Food Outlet by ID",
+    tags=["Food Outlets - ADMIN"],
+)
 async def update_menu_item_food_outlet(
     id: int,
     item_id: int,
@@ -300,26 +283,20 @@ async def update_menu_item_food_outlet(
 
     for key, value in params_dict.items():
         if value is not None:
-            if key == "rating":
-                menu_item.rating = Rating(**params_dict["rating"])
-            else:
-                menu_item.__setattr__(
-                    key, value.lower() if type(value) is str else value
-                )
+            menu_item.__setattr__(key, value.lower() if type(value) is str else value)
 
     details = await menu_item.update(con=con)
 
     disconnect(con)
 
-    details["rating"] = (
-        details["rating"].__dict__ if details["rating"] is not None else None
-    )
-
     return {"item": details}
 
 
 @app.delete(
-    "/food-outlet/{id}/menu/food-item/{item_id}", status_code=status.HTTP_204_NO_CONTENT
+    "/food-outlet/{id}/menu/food-item/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete any Menu Item of any Food Outlet by ID",
+    tags=["Food Outlets - ADMIN"],
 )
 async def delete_menu_item_food_outlet(
     id: int, item_id: int, api_key: APIKey = Depends(get_api_key)
