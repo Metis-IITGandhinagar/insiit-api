@@ -1,9 +1,8 @@
-from app.app import app
 from app.db import connect, disconnect
 from app.models.mess import Mess, MessMenu, MessMenuItem, DayMenu
 from app.models.globals import Location
 from app.auth.key import get_api_key
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, status, HTTPException, APIRouter
 from fastapi.security.api_key import APIKey
 from app.utils.globals import obj_to_json
 from app.models.requests._mess import (
@@ -50,7 +49,10 @@ from app.models.responses._mess import (
 from typing import Optional, Literal
 
 
-@app.get(
+router = APIRouter()
+
+
+@router.get(
     "/mess",
     summary="Get Details of All Messes on the Campus",
     tags=["Mess"],
@@ -78,7 +80,7 @@ async def get_all_mess_details():
     return {"messes": details}
 
 
-@app.get(
+@router.get(
     "/mess/{id}",
     summary="Get Details of any Mess by ID",
     tags=["Mess"],
@@ -101,7 +103,7 @@ async def get_mess_details(id: int):
     return {"mess": obj_to_json(mess)}
 
 
-@app.post(
+@router.post(
     "/mess",
     status_code=status.HTTP_201_CREATED,
     summary="Add a new Mess",
@@ -140,7 +142,7 @@ async def create_mess(
     return {"mess": obj_to_json(mess)}
 
 
-@app.put(
+@router.put(
     "/mess/{id}",
     summary="Update Details of any Mess by ID",
     tags=["[ADMIN] Mess"],
@@ -173,7 +175,7 @@ async def update_mess(
     return {"mess": obj_to_json(mess)}
 
 
-@app.put(
+@router.put(
     "/mess/{mess_id}/menu/{menu_id}",
     summary="Change the Menu of any Mess by ID",
     tags=["[ADMIN] Mess"],
@@ -205,7 +207,7 @@ async def update_mess_change_menu(
     return {"mess": obj_to_json(mess)}
 
 
-@app.delete(
+@router.delete(
     "/mess/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess by ID",
@@ -227,7 +229,7 @@ async def delete_mess(id: int, api_key: APIKey = Depends(get_api_key)):
     disconnect(con)
 
 
-@app.get(
+@router.get(
     "/mess/{id}/menu",
     summary="Get the Current Menu of any Mess by ID",
     tags=["Mess"],
@@ -252,7 +254,7 @@ async def get_current_mess_menu_details(id: int):
     return {"menu": menu}
 
 
-@app.get(
+@router.get(
     "/mess/{id}/menu/{day}",
     summary="Get the Current Menu of a particular Day of any Mess by ID",
     tags=["Mess"],
@@ -287,7 +289,7 @@ async def get_current_mess_menu_details_byDay(
     return {"menu": menu_today}
 
 
-@app.get(
+@router.get(
     "/mess_menu",
     summary="Get Details of any Mess Menus by Month/Year",
     tags=["Mess"],
@@ -322,7 +324,7 @@ async def get_mess_menu_details(month: int | None = None, year: int | None = Non
     return {"menus": details}
 
 
-@app.get(
+@router.get(
     "/mess_menu/{id}",
     summary="Get Details of any Mess Menu by ID",
     tags=["Mess"],
@@ -345,7 +347,7 @@ async def get_mess_menu_details_byID(id: int):
     return {"menu": obj_to_json(menu)}
 
 
-@app.post(
+@router.post(
     "/mess_menu",
     status_code=status.HTTP_201_CREATED,
     summary="Create a new Mess Menu",
@@ -696,7 +698,7 @@ async def create_mess_menu(
     return {"menu": obj_to_json(menu)}
 
 
-@app.put(
+@router.put(
     "/mess_menu/{id}",
     summary="Update Details of any Mess Menu by ID",
     tags=["[ADMIN] Mess"],
@@ -1011,7 +1013,7 @@ async def update_mess_menu(
     return {"menu": obj_to_json(menu)}
 
 
-@app.delete(
+@router.delete(
     "/mess_menu/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess Menu by ID",
@@ -1033,7 +1035,7 @@ async def delete_mess_menu(id: int, api_key: APIKey = Depends(get_api_key)):
     disconnect(con)
 
 
-@app.get(
+@router.get(
     "/mess_menu_item",
     summary="Get Details of all Mess Menu Items",
     tags=["Mess"],
@@ -1061,7 +1063,7 @@ async def get_all_mess_menu_items_details():
     return {"items": details}
 
 
-@app.get(
+@router.get(
     "/mess_menu_item/{id}",
     summary="Get Details of any Mess Menu Item by ID",
     tags=["Mess"],
@@ -1084,7 +1086,7 @@ async def get_mess_menu_item_details(id: int):
     return {"item": obj_to_json(item)}
 
 
-@app.post(
+@router.post(
     "/mess_menu_item",
     status_code=status.HTTP_201_CREATED,
     summary="Create a new Mess Menu Item",
@@ -1121,7 +1123,7 @@ async def create_mess_menu_item(
     return {"item": obj_to_json(item)}
 
 
-@app.put(
+@router.put(
     "/mess_menu_item/{id}",
     summary="Update Details of any Mess Menu Item by ID",
     tags=["[ADMIN] Mess"],
@@ -1154,7 +1156,7 @@ async def update_mess_menu_item(
     return {"item": obj_to_json(item)}
 
 
-@app.delete(
+@router.delete(
     "/mess_menu_item/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess Menu Item by ID",

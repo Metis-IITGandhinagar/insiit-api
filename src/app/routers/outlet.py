@@ -1,3 +1,10 @@
+from app.db import connect, disconnect
+from app.models.outlet import FoodOutlet, searchOutlets, FoodOutletMenuItem
+from app.models.globals import Location
+from app.auth.key import get_api_key
+from fastapi import Depends, status, HTTPException, APIRouter
+from fastapi.security.api_key import APIKey
+from app.utils.globals import obj_to_json
 from app.models.requests._outlet import (
     NewFoodOutletBodyParams,
     UpdateFoodOutletBodyParams,
@@ -5,14 +12,6 @@ from app.models.requests._outlet import (
     AddMenuItemFoodOutletBodyParams,
     UpdateMenuItemFoodOutletBodyParams,
 )
-from app.app import app
-from app.db import connect, disconnect
-from app.models.outlet import FoodOutlet, searchOutlets, FoodOutletMenuItem
-from app.models.globals import Location
-from app.auth.key import get_api_key
-from fastapi import Depends, Response, status, HTTPException
-from fastapi.security.api_key import APIKey
-from app.utils.globals import obj_to_json
 from app.models.responses._outlet import (
     GetAllFoodOutletDetailsResponseModel,
     GetFoodOutletDetailsResponseModel,
@@ -37,8 +36,10 @@ from app.models.responses._outlet import (
     DeleteMenuItemResponseModel_ERR_404_FoodOutletNotFound,
 )
 
+router = APIRouter()
 
-@app.get(
+
+@router.get(
     "/food-outlet",
     summary="Get Details of All Food Outlets on the Campus",
     tags=["Food Outlets"],
@@ -66,7 +67,7 @@ async def get_all_food_outlet_details():
     return {"outlets": details}
 
 
-@app.get(
+@router.get(
     "/food-outlet/{id}",
     summary="Get Details of any Food Outlet by ID",
     tags=["Food Outlets"],
@@ -88,7 +89,7 @@ async def get_food_outlet_details(id: int):
     return {"outlet": obj_to_json(outlet)}
 
 
-@app.get(
+@router.get(
     "/search/food-outlet",
     summary="Search for Food Outlets on the Campus",
     tags=["Food Outlets"],
@@ -134,7 +135,7 @@ async def filter_food_outlets(
     return {"outlets": outlets}
 
 
-@app.post(
+@router.post(
     "/food-outlet",
     status_code=status.HTTP_201_CREATED,
     summary="Add a new Food Outlet",
@@ -183,7 +184,7 @@ async def create_food_outlet(
     return {"outlet": obj_to_json(outlet)}
 
 
-@app.put(
+@router.put(
     "/food-outlet/{id}",
     summary="Update Details of any Food Outlet by ID",
     tags=["[ADMIN] Food Outlets"],
@@ -218,7 +219,7 @@ async def update_food_outlet(
     return {"outlet": obj_to_json(outlet)}
 
 
-@app.delete(
+@router.delete(
     "/food-outlet/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Food Outlet by ID",
@@ -247,7 +248,7 @@ async def delete_food_outlet(id: int, api_key: APIKey = Depends(get_api_key)):
     await outlet.remove(con)
 
 
-@app.get(
+@router.get(
     "/food-outlet_menu_food-item",
     summary="Get Details of All Menu Items of Food Outlets",
     tags=["Food Outlets"],
@@ -274,7 +275,7 @@ async def get_all_menu_items():
     return {"food_items": details}
 
 
-@app.get(
+@router.get(
     "/food-outlet_menu_food-item/{id}",
     summary="Get Details of any Menu Item of Food Outlets by ID",
     tags=["Food Outlets"],
@@ -296,7 +297,7 @@ async def get_menu_item(id: int):
     return {"food_item": obj_to_json(item)}
 
 
-@app.post(
+@router.post(
     "/food-outlet/{id}/menu/food-item",
     status_code=status.HTTP_201_CREATED,
     summary="Add a new Menu Item to any Food Outlet by ID",
@@ -344,7 +345,7 @@ async def add_menu_item_food_outlet(
     return {"item": obj_to_json(menu_item)}
 
 
-@app.put(
+@router.put(
     "/food-outlet/{id}/menu/food-item/{item_id}",
     summary="Update Details of any Menu Item of any Food Outlet by ID",
     tags=["[ADMIN] Food Outlets"],
@@ -384,7 +385,7 @@ async def update_menu_item_food_outlet(
     return {"item": obj_to_json(menu_item)}
 
 
-@app.delete(
+@router.delete(
     "/food-outlet/{id}/menu/food-item/{item_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Menu Item of any Food Outlet by ID",

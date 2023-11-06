@@ -6,6 +6,8 @@ from config import app_description, tags_metadata
 from fastapi.openapi.utils import get_openapi
 from fastapi.openapi.docs import get_swagger_ui_html
 from pydantic import BaseModel
+from app.routers.mess import router as MessRouter
+from app.routers.outlet import router as OutletRouter
 
 
 def create_app():
@@ -73,4 +75,5 @@ async def swagger_ui_html():
     )
 
 
-from app.routes import mess, outlet
+app.include_router(MessRouter)
+app.include_router(OutletRouter)
