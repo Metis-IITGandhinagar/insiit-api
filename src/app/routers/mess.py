@@ -1,12 +1,11 @@
-from app.app import app
 from app.db import connect, disconnect
-from app.interfaces.mess import Mess, MessMenu, MessMenuItem, DayMenu
-from app.interfaces.common import Location
+from app.models.mess import Mess, MessMenu, MessMenuItem, DayMenu
+from app.models.globals import Location
 from app.auth.key import get_api_key
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, status, HTTPException, APIRouter
 from fastapi.security.api_key import APIKey
-from app.utils.DBUtils import obj_to_json
-from appTypes.messTypes import (
+from app.utils.globals import obj_to_json
+from app.models.requests._mess import (
     NewMessBodyParams,
     UpdateMessBodyParams,
     NewMessMenuBodyParams,
@@ -14,10 +13,51 @@ from appTypes.messTypes import (
     NewMessMenuItemBodyParams,
     UpdateMessMenuItemBodyParams,
 )
+from app.models.responses._mess import (
+    GetAllMessDetailsResponseModel,
+    GetMessDetailsResponseModel,
+    GetMessDetailsResponseModel_ERR_404,
+    CreateMessResponseModel,
+    CreateMessResponseModel_ERR_400,
+    UpdateMessResponseModel,
+    UpdateMessResponseModel_ERR_404,
+    UpdateMessChangeMenuResponseModel,
+    UpdateMessChangeMenuResponseModel_ERR_404_MessMenuNotFound,
+    UpdateMessChangeMenuResponseModel_ERR_404_MessNotFound,
+    DeleteMessResponseModel_ERR_404,
+    GetCurrentMessMenuDetailsResponseModel,
+    GetCurrentMessMenuDetailsResponseModel_ERR_404,
+    GetCurrentMessMenuDetailsByDayResponseModel,
+    GetCurrentMessMenuDetailsByDayResponseModel_ERR_404,
+    GetMessMenuDetailsResponseModel,
+    GetMessMenuDetailsByIDsResponseModel,
+    GetMessMenuDetailsByIDsResponseModel_ERR_404,
+    CreateMessMenuResponseModel,
+    CreateMessMenuResponseModel_ERR_400,
+    UpdateMessMenuResponseModel,
+    UpdateMessMenuResponseModel_ERR_404,
+    DeleteMessMenuResponseModel_ERR_404,
+    GetAllMessMenuItemsDetails,
+    GetMessMenuItemDetailsResponseModel,
+    GetMessMenuItemDetailsResponseModel_ERR_404,
+    CreateMessMenuItemResponseModel,
+    CreateMessMenuItemResponseModel_ERR_400,
+    UpdateMessMenuItemResponseModel,
+    UpdateMessMenuItemResponseModel_ERR_404,
+    DeleteMessMenuItemResponseModel_ERR_404,
+)
 from typing import Optional, Literal
 
 
-@app.get("/mess", summary="Get Details of All Messes on the Campus", tags=["Mess"])
+router = APIRouter()
+
+
+@router.get(
+    "/mess",
+    summary="Get Details of All Messes on the Campus",
+    tags=["Mess"],
+    response_model=GetAllMessDetailsResponseModel,
+)
 async def get_all_mess_details():
     con = connect()
     cursor = con.cursor()
@@ -40,7 +80,18 @@ async def get_all_mess_details():
     return {"messes": details}
 
 
-@app.get("/mess/{id}", summary="Get Details of any Mess by ID", tags=["Mess"])
+@router.get(
+    "/mess/{id}",
+    summary="Get Details of any Mess by ID",
+    tags=["Mess"],
+    response_model=GetMessDetailsResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": GetMessDetailsResponseModel_ERR_404,
+        }
+    },
+)
 async def get_mess_details(id: int):
     con = connect()
 
@@ -52,11 +103,18 @@ async def get_mess_details(id: int):
     return {"mess": obj_to_json(mess)}
 
 
-@app.post(
+@router.post(
     "/mess",
     status_code=status.HTTP_201_CREATED,
     summary="Add a new Mess",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    response_model=CreateMessResponseModel,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad Request Error",
+            "model": CreateMessResponseModel_ERR_400,
+        }
+    },
 )
 async def create_mess(
     params: NewMessBodyParams, api_key: APIKey = Depends(get_api_key)
@@ -72,7 +130,7 @@ async def create_mess(
         await mess.sync_details(con)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Food outlet already exists",
+            detail="Mess already exists",
         )
     except HTTPException as e:
         if e.status_code != status.HTTP_404_NOT_FOUND:
@@ -84,8 +142,17 @@ async def create_mess(
     return {"mess": obj_to_json(mess)}
 
 
-@app.put(
-    "/mess/{id}", summary="Update Details of any Mess by ID", tags=["Mess - ADMIN"]
+@router.put(
+    "/mess/{id}",
+    summary="Update Details of any Mess by ID",
+    tags=["[ADMIN] Mess"],
+    response_model=UpdateMessResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": UpdateMessResponseModel_ERR_404,
+        }
+    },
 )
 async def update_mess(
     id: int, params: UpdateMessBodyParams, api_key: APIKey = Depends(get_api_key)
@@ -108,10 +175,18 @@ async def update_mess(
     return {"mess": obj_to_json(mess)}
 
 
-@app.put(
+@router.put(
     "/mess/{mess_id}/menu/{menu_id}",
     summary="Change the Menu of any Mess by ID",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    response_model=UpdateMessChangeMenuResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": UpdateMessChangeMenuResponseModel_ERR_404_MessMenuNotFound
+            | UpdateMessChangeMenuResponseModel_ERR_404_MessNotFound,
+        }
+    },
 )
 async def update_mess_change_menu(
     mess_id: int, menu_id: int, api_key: APIKey = Depends(get_api_key)
@@ -132,11 +207,17 @@ async def update_mess_change_menu(
     return {"mess": obj_to_json(mess)}
 
 
-@app.delete(
+@router.delete(
     "/mess/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess by ID",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": DeleteMessResponseModel_ERR_404,
+        }
+    },
 )
 async def delete_mess(id: int, api_key: APIKey = Depends(get_api_key)):
     con = connect()
@@ -148,8 +229,17 @@ async def delete_mess(id: int, api_key: APIKey = Depends(get_api_key)):
     disconnect(con)
 
 
-@app.get(
-    "/mess/{id}/menu", summary="Get the Current Menu of any Mess by ID", tags=["Mess"]
+@router.get(
+    "/mess/{id}/menu",
+    summary="Get the Current Menu of any Mess by ID",
+    tags=["Mess"],
+    response_model=GetCurrentMessMenuDetailsResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": GetCurrentMessMenuDetailsResponseModel_ERR_404,
+        }
+    },
 )
 async def get_current_mess_menu_details(id: int):
     con = connect()
@@ -160,15 +250,21 @@ async def get_current_mess_menu_details(id: int):
     disconnect(con)
 
     menu = mess.menu
-    # await menu.sync_details(con)
 
     return {"menu": menu}
 
 
-@app.get(
+@router.get(
     "/mess/{id}/menu/{day}",
     summary="Get the Current Menu of a particular Day of any Mess by ID",
     tags=["Mess"],
+    response_model=GetCurrentMessMenuDetailsByDayResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": GetCurrentMessMenuDetailsByDayResponseModel_ERR_404,
+        }
+    },
 )
 async def get_current_mess_menu_details_byDay(
     id: int,
@@ -184,7 +280,6 @@ async def get_current_mess_menu_details_byDay(
     disconnect(con)
 
     menu = mess.menu
-    # await menu.sync_details(con)
 
     if menu is None:
         return {"menu": None}
@@ -194,8 +289,11 @@ async def get_current_mess_menu_details_byDay(
     return {"menu": menu_today}
 
 
-@app.get(
-    "/mess_menu", summary="Get Details of any Mess Menus by Month/Year", tags=["Mess"]
+@router.get(
+    "/mess_menu",
+    summary="Get Details of any Mess Menus by Month/Year",
+    tags=["Mess"],
+    response_model=GetMessMenuDetailsResponseModel,
 )
 async def get_mess_menu_details(month: int | None = None, year: int | None = None):
     con = connect()
@@ -226,7 +324,18 @@ async def get_mess_menu_details(month: int | None = None, year: int | None = Non
     return {"menus": details}
 
 
-@app.get("/mess_menu/{id}", summary="Get Details of any Mess Menu by ID", tags=["Mess"])
+@router.get(
+    "/mess_menu/{id}",
+    summary="Get Details of any Mess Menu by ID",
+    tags=["Mess"],
+    response_model=GetMessMenuDetailsByIDsResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": GetMessMenuDetailsByIDsResponseModel_ERR_404,
+        }
+    },
+)
 async def get_mess_menu_details_byID(id: int):
     con = connect()
 
@@ -238,16 +347,35 @@ async def get_mess_menu_details_byID(id: int):
     return {"menu": obj_to_json(menu)}
 
 
-@app.post(
+@router.post(
     "/mess_menu",
     status_code=status.HTTP_201_CREATED,
     summary="Create a new Mess Menu",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    response_model=CreateMessMenuResponseModel,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad Request Error",
+            "model": CreateMessMenuResponseModel_ERR_400,
+        }
+    },
 )
 async def create_mess_menu(
     params: NewMessMenuBodyParams, api_key: APIKey = Depends(get_api_key)
 ):
     con = connect()
+
+    try:
+        menu = MessMenu(month=params.month, year=params.year)
+        await menu.sync_details(con)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mess menu already exists",
+        )
+    except HTTPException as e:
+        if e.status_code != status.HTTP_404_NOT_FOUND:
+            disconnect(con)
+            raise e
 
     monday: DayMenu | None = None
     if params.monday is not None:
@@ -570,10 +698,17 @@ async def create_mess_menu(
     return {"menu": obj_to_json(menu)}
 
 
-@app.put(
+@router.put(
     "/mess_menu/{id}",
     summary="Update Details of any Mess Menu by ID",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    response_model=UpdateMessMenuResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": UpdateMessMenuResponseModel_ERR_404,
+        }
+    },
 )
 async def update_mess_menu(
     id: int,
@@ -878,11 +1013,17 @@ async def update_mess_menu(
     return {"menu": obj_to_json(menu)}
 
 
-@app.delete(
+@router.delete(
     "/mess_menu/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess Menu by ID",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": DeleteMessMenuResponseModel_ERR_404,
+        }
+    },
 )
 async def delete_mess_menu(id: int, api_key: APIKey = Depends(get_api_key)):
     con = connect()
@@ -894,7 +1035,12 @@ async def delete_mess_menu(id: int, api_key: APIKey = Depends(get_api_key)):
     disconnect(con)
 
 
-@app.get("/mess_menu_item", summary="Get Details of all Mess Menu Items", tags=["Mess"])
+@router.get(
+    "/mess_menu_item",
+    summary="Get Details of all Mess Menu Items",
+    tags=["Mess"],
+    response_model=GetAllMessMenuItemsDetails,
+)
 async def get_all_mess_menu_items_details():
     con = connect()
     cursor = con.cursor()
@@ -917,12 +1063,19 @@ async def get_all_mess_menu_items_details():
     return {"items": details}
 
 
-@app.get(
+@router.get(
     "/mess_menu_item/{id}",
     summary="Get Details of any Mess Menu Item by ID",
     tags=["Mess"],
+    response_model=GetMessMenuItemDetailsResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": GetMessMenuItemDetailsResponseModel_ERR_404,
+        }
+    },
 )
-async def get_mess_menu_items_details(id: int):
+async def get_mess_menu_item_details(id: int):
     con = connect()
 
     item = MessMenuItem(id=id)
@@ -933,11 +1086,18 @@ async def get_mess_menu_items_details(id: int):
     return {"item": obj_to_json(item)}
 
 
-@app.post(
+@router.post(
     "/mess_menu_item",
     status_code=status.HTTP_201_CREATED,
     summary="Create a new Mess Menu Item",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    response_model=CreateMessMenuItemResponseModel,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad Request Error",
+            "model": CreateMessMenuItemResponseModel_ERR_400,
+        }
+    },
 )
 async def create_mess_menu_item(
     params: NewMessMenuItemBodyParams, api_key: APIKey = Depends(get_api_key)
@@ -949,7 +1109,7 @@ async def create_mess_menu_item(
         await item.sync_details(con)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Menu item already exists",
+            detail="Mess menu item already exists",
         )
     except HTTPException as e:
         if e.status_code != status.HTTP_404_NOT_FOUND:
@@ -960,13 +1120,20 @@ async def create_mess_menu_item(
 
     disconnect(con)
 
-    return {"menuItem": obj_to_json(item)}
+    return {"item": obj_to_json(item)}
 
 
-@app.put(
+@router.put(
     "/mess_menu_item/{id}",
     summary="Update Details of any Mess Menu Item by ID",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    response_model=UpdateMessMenuItemResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": UpdateMessMenuItemResponseModel_ERR_404,
+        }
+    },
 )
 async def update_mess_menu_item(
     id: int,
@@ -986,14 +1153,20 @@ async def update_mess_menu_item(
 
     disconnect(con)
 
-    return {"menuItem": obj_to_json(item)}
+    return {"item": obj_to_json(item)}
 
 
-@app.delete(
+@router.delete(
     "/mess_menu_item/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess Menu Item by ID",
-    tags=["Mess - ADMIN"],
+    tags=["[ADMIN] Mess"],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": DeleteMessMenuItemResponseModel_ERR_404,
+        }
+    },
 )
 async def delete_mess_menu_item(id: int, api_key: APIKey = Depends(get_api_key)):
     con = connect()
