@@ -1,6 +1,5 @@
 from typing import Optional, List
-from app.interfaces.common import Location
-from appTypes.outletTypes import FoodOutletMenu, FoodOutletDetails, FoodOutletDBValues
+from app.models.globals import Location
 from datetime import time
 from fastapi import HTTPException, status
 import psycopg2
@@ -54,7 +53,7 @@ class FoodOutletMenuItem:
         try:
             self.id = result[0]
             self.name = result[1]
-            self.price = result[2]
+            self.price = int(result[2])
             self.description = result[3]
             self.rating = result[4]
             self.size = result[5]
@@ -99,7 +98,6 @@ class FoodOutletMenuItem:
 
         cursor.close()
         await self.sync_details(con=con)
-        return self.__dict__
 
     async def update(self, con: psycopg2.extensions.connection):
         cursor = con.cursor()
@@ -119,7 +117,6 @@ class FoodOutletMenuItem:
         )
         con.commit()
         cursor.close()
-        return self.__dict__
 
     async def remove(self, con: psycopg2.extensions.connection):
         cursor = con.cursor()
@@ -151,7 +148,7 @@ class FoodOutlet:
         open_time: Optional[time] = None,
         close_time: Optional[time] = None,
         rating: Optional[float] = None,
-        menu: Optional[List[FoodOutletMenuItem]] = None,
+        menu: Optional[List] = None,
         image: Optional[str] = None,
     ):
         self.id = id
@@ -172,11 +169,15 @@ class FoodOutlet:
         elif self.name is not None:
             cursor.execute(f"SELECT * FROM food_outlets WHERE name='{self.name}'")
         else:
+            cursor.close()
+            con.close()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient data"
             )
 
         result = cursor.fetchone()
+
+        cursor.close()
 
         try:
             self.id = result[0]
@@ -207,10 +208,10 @@ class FoodOutlet:
             # print("disconnected here")
             disconnect(con)
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Food outlet not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Food Outlet not found"
             )
 
-    async def create(self, con: psycopg2.extensions.connection) -> FoodOutletDetails:
+    async def create(self, con: psycopg2.extensions.connection):
         cursor = con.cursor()
 
         location_value = (
@@ -242,10 +243,10 @@ class FoodOutlet:
 
         self.id = cursor.fetchone()[0]
         con.commit()
+        cursor.close()
         await self.sync_details(con)
-        return self.__dict__
 
-    async def update(self, con: psycopg2.extensions.connection) -> FoodOutletDetails:
+    async def update(self, con: psycopg2.extensions.connection):
         cursor = con.cursor()
 
         location_value = (
@@ -275,13 +276,15 @@ class FoodOutlet:
             ),
         )
         con.commit()
-        return self.__dict__
+        cursor.close()
+        await self.sync_details(con)
 
     async def remove(self, con: psycopg2.extensions.connection):
         cursor = con.cursor()
 
         cursor.execute(f"DELETE FROM food_outlets WHERE id={self.id}")
         con.commit()
+        cursor.close()
 
 
 async def searchOutlets(
@@ -292,7 +295,7 @@ async def searchOutlets(
     timeFilter: Optional[time] = None,
     ratingFilter: Optional[float] = None,
     itemFilter: Optional[str] = None,
-) -> List[FoodOutletDetails]:
+) -> List:
     cursor = con.cursor()
 
     cursor.execute(f"SELECT id FROM food_outlets")

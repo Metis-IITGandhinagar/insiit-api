@@ -1,7 +1,7 @@
 import psycopg2.extensions
 from fastapi import HTTPException, status
-from app.utils.DBUtils import json_to_sql
-from app.interfaces.common import Location
+from app.utils._db import json_to_sql
+from app.models.globals import Location
 from typing_extensions import TypedDict
 from datetime import time
 from typing import Optional

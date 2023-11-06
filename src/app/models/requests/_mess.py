@@ -1,22 +1,23 @@
 from pydantic import BaseModel
 from typing import Optional
 from typing_extensions import TypedDict
+from app.models.requests.globals import LocationRequestModel, MessTimingsRequestModel
 
 
 class NewMessBodyParams(BaseModel):
     name: str
-    location: Optional[dict[str, str]] = None
+    location: Optional[LocationRequestModel] = None
     landmark: Optional[str] = None
-    timings: Optional[dict[str, str]] = None
+    timings: Optional[MessTimingsRequestModel] = None
     rating: Optional[float] = None
     image: Optional[str] = None
 
 
 class UpdateMessBodyParams(BaseModel):
     name: Optional[str] = None
-    location: Optional[dict[str, str]] = None
+    location: Optional[LocationRequestModel] = None
     landmark: Optional[str] = None
-    timings: Optional[dict[str, str]] = None
+    timings: Optional[MessTimingsRequestModel] = None
     rating: Optional[float] = None
     image: Optional[str] = None
 

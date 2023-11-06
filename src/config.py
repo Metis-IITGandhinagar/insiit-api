@@ -41,11 +41,11 @@ tags_metadata = [
         "description": "<font size='4'>Endpoints related to Food Outlets</font>",
     },
     {
-        "name": "Mess - ADMIN",
+        "name": "[ADMIN] Mess",
         "description": "<font size='4'>Admin endpoints related to Mess - POST, PUT, DELETE</font>",
     },
     {
-        "name": "Food Outlets - ADMIN",
+        "name": "[ADMIN] Food Outlets",
         "description": "<font size='4'>Admin endpoints related to Food Outlets - POST, PUT, DELETE</font>",
     },
 ]

@@ -73,4 +73,4 @@ async def swagger_ui_html():
     )
 
 
-from app.routes import outletRoutes, messRoutes
+from app.routes import mess, outlet
