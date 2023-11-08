@@ -88,7 +88,7 @@ class DeleteMessResponseModel_ERR_404(BaseModel):
 
 
 class GetCurrentMessMenuDetailsResponseModel(BaseModel):
-    menu: MessMenuResponseModel
+    menu: MessMenuResponseModel | None
 
 
 class GetCurrentMessMenuDetailsResponseModel_ERR_404(BaseModel):
@@ -96,7 +96,7 @@ class GetCurrentMessMenuDetailsResponseModel_ERR_404(BaseModel):
 
 
 class GetCurrentMessMenuDetailsByDayResponseModel(BaseModel):
-    menu: DayMenuResponseModel
+    menu: DayMenuResponseModel | None
 
 
 class GetCurrentMessMenuDetailsByDayResponseModel_ERR_404(BaseModel):
@@ -108,7 +108,7 @@ class GetMessMenuDetailsResponseModel(BaseModel):
 
 
 class GetMessMenuDetailsByIDsResponseModel(BaseModel):
-    menu: MessMenuResponseModel
+    menu: MessMenuResponseModel | None
 
 
 class GetMessMenuDetailsByIDsResponseModel_ERR_404(BaseModel):
