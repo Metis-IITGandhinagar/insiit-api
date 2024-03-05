@@ -55,7 +55,7 @@ router = APIRouter()
 @router.get(
     "/mess",
     summary="Get Details of All Messes on the Campus",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetAllMessDetailsResponseModel,
 )
 async def get_all_mess_details():
@@ -83,7 +83,7 @@ async def get_all_mess_details():
 @router.get(
     "/mess/{id}",
     summary="Get Details of any Mess by ID",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetMessDetailsResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -107,7 +107,7 @@ async def get_mess_details(id: int):
     "/mess",
     status_code=status.HTTP_201_CREATED,
     summary="Add a new Mess",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     response_model=CreateMessResponseModel,
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -145,7 +145,7 @@ async def create_mess(
 @router.put(
     "/mess/{id}",
     summary="Update Details of any Mess by ID",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     response_model=UpdateMessResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -178,7 +178,7 @@ async def update_mess(
 @router.put(
     "/mess/{mess_id}/menu/{menu_id}",
     summary="Change the Menu of any Mess by ID",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     response_model=UpdateMessChangeMenuResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -211,7 +211,7 @@ async def update_mess_change_menu(
     "/mess/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess by ID",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     responses={
         status.HTTP_404_NOT_FOUND: {
             "description": "Not Found Error",
@@ -232,7 +232,7 @@ async def delete_mess(id: int, api_key: APIKey = Depends(get_api_key)):
 @router.get(
     "/mess/{id}/menu",
     summary="Get the Current Menu of any Mess by ID",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetCurrentMessMenuDetailsResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -257,7 +257,7 @@ async def get_current_mess_menu_details(id: int):
 @router.get(
     "/mess/{id}/menu/{day}",
     summary="Get the Current Menu of a particular Day of any Mess by ID",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetCurrentMessMenuDetailsByDayResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -292,7 +292,7 @@ async def get_current_mess_menu_details_byDay(
 @router.get(
     "/mess_menu",
     summary="Get Details of any Mess Menus by Month/Year",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetMessMenuDetailsResponseModel,
 )
 async def get_mess_menu_details(month: int | None = None, year: int | None = None):
@@ -327,7 +327,7 @@ async def get_mess_menu_details(month: int | None = None, year: int | None = Non
 @router.get(
     "/mess_menu/{id}",
     summary="Get Details of any Mess Menu by ID",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetMessMenuDetailsByIDsResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -351,7 +351,7 @@ async def get_mess_menu_details_byID(id: int):
     "/mess_menu",
     status_code=status.HTTP_201_CREATED,
     summary="Create a new Mess Menu",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     response_model=CreateMessMenuResponseModel,
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -701,7 +701,7 @@ async def create_mess_menu(
 @router.put(
     "/mess_menu/{id}",
     summary="Update Details of any Mess Menu by ID",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     response_model=UpdateMessMenuResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -1017,7 +1017,7 @@ async def update_mess_menu(
     "/mess_menu/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess Menu by ID",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     responses={
         status.HTTP_404_NOT_FOUND: {
             "description": "Not Found Error",
@@ -1038,7 +1038,7 @@ async def delete_mess_menu(id: int, api_key: APIKey = Depends(get_api_key)):
 @router.get(
     "/mess_menu_item",
     summary="Get Details of all Mess Menu Items",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetAllMessMenuItemsDetails,
 )
 async def get_all_mess_menu_items_details():
@@ -1066,7 +1066,7 @@ async def get_all_mess_menu_items_details():
 @router.get(
     "/mess_menu_item/{id}",
     summary="Get Details of any Mess Menu Item by ID",
-    tags=["Mess"],
+    tags=["mess"],
     response_model=GetMessMenuItemDetailsResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -1090,7 +1090,7 @@ async def get_mess_menu_item_details(id: int):
     "/mess_menu_item",
     status_code=status.HTTP_201_CREATED,
     summary="Create a new Mess Menu Item",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     response_model=CreateMessMenuItemResponseModel,
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -1126,7 +1126,7 @@ async def create_mess_menu_item(
 @router.put(
     "/mess_menu_item/{id}",
     summary="Update Details of any Mess Menu Item by ID",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     response_model=UpdateMessMenuItemResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -1160,7 +1160,7 @@ async def update_mess_menu_item(
     "/mess_menu_item/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Mess Menu Item by ID",
-    tags=["[ADMIN] Mess"],
+    tags=["[admin] mess"],
     responses={
         status.HTTP_404_NOT_FOUND: {
             "description": "Not Found Error",

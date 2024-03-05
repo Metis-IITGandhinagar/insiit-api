@@ -42,7 +42,7 @@ router = APIRouter()
 @router.get(
     "/food-outlet",
     summary="Get Details of All Food Outlets on the Campus",
-    tags=["Food Outlets"],
+    tags=["food outlets"],
     response_model=GetAllFoodOutletDetailsResponseModel,
 )
 async def get_all_food_outlet_details():
@@ -70,7 +70,7 @@ async def get_all_food_outlet_details():
 @router.get(
     "/food-outlet/{id}",
     summary="Get Details of any Food Outlet by ID",
-    tags=["Food Outlets"],
+    tags=["food outlets"],
     response_model=GetFoodOutletDetailsResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -92,7 +92,7 @@ async def get_food_outlet_details(id: int):
 @router.get(
     "/search/food-outlet",
     summary="Search for Food Outlets on the Campus",
-    tags=["Food Outlets"],
+    tags=["food outlets"],
     response_model=FilterFoodOutletsResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -139,7 +139,7 @@ async def filter_food_outlets(
     "/food-outlet",
     status_code=status.HTTP_201_CREATED,
     summary="Add a new Food Outlet",
-    tags=["[ADMIN] Food Outlets"],
+    tags=["[admin] food outlets"],
     response_model=CreateFoodOutletResponseModel,
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -187,7 +187,7 @@ async def create_food_outlet(
 @router.put(
     "/food-outlet/{id}",
     summary="Update Details of any Food Outlet by ID",
-    tags=["[ADMIN] Food Outlets"],
+    tags=["[admin] food outlets"],
     response_model=UpdateFoodOutletResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -223,7 +223,7 @@ async def update_food_outlet(
     "/food-outlet/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Food Outlet by ID",
-    tags=["[ADMIN] Food Outlets"],
+    tags=["[admin] food outlets"],
     responses={
         status.HTTP_204_NO_CONTENT: {
             "description": "Successfully Deteled",
@@ -251,7 +251,7 @@ async def delete_food_outlet(id: int, api_key: APIKey = Depends(get_api_key)):
 @router.get(
     "/food-outlet_menu_food-item",
     summary="Get Details of All Menu Items of Food Outlets",
-    tags=["Food Outlets"],
+    tags=["food outlets"],
     response_model=GetAllMenuItemsResponseModel,
 )
 async def get_all_menu_items():
@@ -278,7 +278,7 @@ async def get_all_menu_items():
 @router.get(
     "/food-outlet_menu_food-item/{id}",
     summary="Get Details of any Menu Item of Food Outlets by ID",
-    tags=["Food Outlets"],
+    tags=["food outlets"],
     response_model=GetMenuItemResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -301,7 +301,7 @@ async def get_menu_item(id: int):
     "/food-outlet/{id}/menu/food-item",
     status_code=status.HTTP_201_CREATED,
     summary="Add a new Menu Item to any Food Outlet by ID",
-    tags=["[ADMIN] Food Outlets"],
+    tags=["[admin] food outlets"],
     response_model=CreateMenuItemResponseModel,
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -348,7 +348,7 @@ async def add_menu_item_food_outlet(
 @router.put(
     "/food-outlet/{id}/menu/food-item/{item_id}",
     summary="Update Details of any Menu Item of any Food Outlet by ID",
-    tags=["[ADMIN] Food Outlets"],
+    tags=["[admin] food outlets"],
     response_model=UpdateMenuItemResponseModel,
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -389,7 +389,7 @@ async def update_menu_item_food_outlet(
     "/food-outlet/{id}/menu/food-item/{item_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete any Menu Item of any Food Outlet by ID",
-    tags=["[ADMIN] Food Outlets"],
+    tags=["[admin] food outlets"],
     responses={
         status.HTTP_204_NO_CONTENT: {
             "description": "Successfully Deteled",

@@ -27,25 +27,36 @@ db_config = config["db"]
 with open("./assets/app_description.md", "r") as f:
     app_description = f.read()
 
+# with open("./assets/static/styles.css", "r") as f:
+#     styles = f.read()
+
 tags_metadata = [
     {
-        "name": "Hello World!",
-        "description": "<font size='4'>Just a simple Hello World! endpoint</font>",
+        "name": "hello world!",
+        "description": '<font size="4">A simple "Hello World" endpoint</font>',
     },
     {
-        "name": "Mess",
-        "description": "<font size='4'>Endpoints related to Mess</font>",
+        "name": "mess",
+        "description": "<font size='4'>Everything about the messes at IITGN</font>",
     },
     {
-        "name": "Food Outlets",
-        "description": "<font size='4'>Endpoints related to Food Outlets</font>",
+        "name": "food outlets",
+        "description": "<font size='4'>Everything about the different food outlets at IITGN</font>",
     },
     {
-        "name": "[ADMIN] Mess",
-        "description": "<font size='4'>Admin endpoints related to Mess - POST, PUT, DELETE</font>",
+        "name": "bus",
+        "description": "<font size='4'>Everything about the bus schedule at IITGN</font>",
     },
     {
-        "name": "[ADMIN] Food Outlets",
-        "description": "<font size='4'>Admin endpoints related to Food Outlets - POST, PUT, DELETE</font>",
+        "name": "[admin] mess",
+        "description": "<font size='4'>Admin endpoints for manipulating data of messes</font>",
+    },
+    {
+        "name": "[admin] food outlets",
+        "description": "<font size='4'>Admin endpoints for manipulating data of food outlets</font>",
+    },
+    {
+        "name": "[admin] bus",
+        "description": "<font size='4'>Admin endpoints for manipulating data of bus schedule</font>",
     },
 ]
