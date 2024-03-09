@@ -8,6 +8,9 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from pydantic import BaseModel
 from app.routers.mess import router as MessRouter
 from app.routers.outlet import router as OutletRouter
+from app.routers.bus import router as BusRouter
+
+# from fastapi.templating import Jinja2Templates
 
 
 def create_app():
@@ -56,7 +59,7 @@ class HelloWorldResponseModel(BaseModel):
 @app.get(
     "/",
     summary="Hello World!",
-    tags=["Hello World!"],
+    tags=["hello world!"],
     response_model=HelloWorldResponseModel,
 )
 async def root():
@@ -72,8 +75,10 @@ async def swagger_ui_html():
         title="InsIIT API - Docs",
         swagger_favicon_url="https://avatars.githubusercontent.com/u/146699003?s=1000&v=4",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+        swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     )
 
 
 app.include_router(MessRouter)
 app.include_router(OutletRouter)
+app.include_router(BusRouter)

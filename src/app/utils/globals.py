@@ -1,3 +1,6 @@
+from datetime import datetime, time
+
+
 def obj_to_json(obj):
     if isinstance(obj, (int, float, str, bool, type(None))):
         return obj
