@@ -75,6 +75,7 @@ async def swagger_ui_html():
         title="InsIIT API - Docs",
         swagger_favicon_url="https://avatars.githubusercontent.com/u/146699003?s=1000&v=4",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+        swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     )
 
 

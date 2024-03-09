@@ -2,19 +2,36 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from app.db import connect, disconnect
 from app.models.bus import (
     create_bus_route,
+    create_bus_schedule,
     create_bus_stop,
+    create_bus_type,
     get_bus_route_by_id,
     get_bus_routes,
+    get_bus_schedule_by_id,
+    get_bus_schedules,
     get_bus_stop_by_id,
     get_bus_stops,
+    get_bus_type_by_id,
+    get_bus_types,
     remove_bus_route,
+    remove_bus_schedule,
     update_bus_route,
+    update_bus_schedule,
+    update_bus_type,
 )
 from app.models.globals import Location
 from app.utils.globals import obj_to_json
 from fastapi.security.api_key import APIKey
 from app.auth.key import get_api_key
 from app.models.responses._bus import (
+    GetAllBusTypesResponseModel,
+    GetBusTypeResponseModel,
+    GetBusTypeResponseModel_ERR_404,
+    NewBusTypeResponseModel,
+    NewBusTypeResponseModel_ERR_400,
+    UpdateBusTypeResponseModel,
+    UpdateBusTypeResponseModel_ERR_404,
+    DeleteBusTypeResponseModel_ERR_404,
     GetAllBusStopsResponseModel,
     GetBusStopResponseModel,
     GetBusStopResponseModel_ERR_404,
@@ -32,15 +49,172 @@ from app.models.responses._bus import (
     UpdateBusRouteResponseModel,
     UpdateBusRouteResponseModel_ERR_404,
     DeleteBusRouteResponseModel_ERR_404,
+    GetAllBusSchedulesResponseModel,
+    GetBusScheduleResponseModel,
+    GetBusScheduleResponseModel_ERR_404,
+    NewBusScheduleResponseModel,
+    NewBusScheduleResponseModel_ERR_404,
+    NewBusScheduleResponseModel_ERR_400,
+    UpdateBusScheduleResponseModel,
+    UpdateBusScheduleResponseModel_ERR_404,
+    UpdateBusScheduleResponseModel_ERR_400,
+    DeleteBusScheduleResponseModel_ERR_404,
 )
 from app.models.requests._bus import (
+    NewBusTypeBodyParams,
+    UpdateBusTypeBodyParams,
     NewBusStopBodyParams,
     UpdateBusStopBodyParams,
     NewBusRouteBodyParams,
     UpdateBusRouteBodyParams,
+    NewBusScheduleBodyParams,
+    UpdateBusScheduleBodyParams,
 )
 
 router = APIRouter()
+
+
+@router.get(
+    "/bus_type",
+    summary="Get Details of All Bus Types",
+    tags=["bus"],
+    response_model=GetAllBusTypesResponseModel,
+)
+async def get_all_bus_types():
+    con = connect()
+
+    bus_types = await get_bus_types(con)
+    types_json = obj_to_json(bus_types)
+
+    disconnect(con)
+
+    return {"bus_types": types_json}
+
+
+@router.get(
+    "/bus_type/{id}",
+    summary="Get Details of a Bus Type",
+    tags=["bus"],
+    response_model=GetBusTypeResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": GetBusTypeResponseModel_ERR_404,
+        }
+    },
+)
+async def get_bus_type(id: int):
+    con = connect()
+
+    bus_type = await get_bus_type_by_id(con, id)
+
+    if bus_type is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Type Not Found"
+        )
+
+    type_json = obj_to_json(bus_type)
+
+    disconnect(con)
+
+    return {"type": type_json}
+
+
+@router.post(
+    "/bus_type",
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a New Bus Type",
+    tags=["[admin] bus"],
+    response_model=NewBusTypeResponseModel,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad Request Error",
+            "model": NewBusTypeResponseModel_ERR_400,
+        }
+    },
+)
+async def add_bus_type(
+    params: NewBusTypeBodyParams, api_key: APIKey = Depends(get_api_key)
+):
+    con = connect()
+
+    bus_type = await create_bus_type(con, params.name)
+
+    if bus_type is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Bus Type Already Exists"
+        )
+
+    type_json = obj_to_json(bus_type)
+
+    disconnect(con)
+
+    return {"type": type_json}
+
+
+@router.put(
+    "/bus_type/{id}",
+    summary="Update Details of a Bus Type by ID",
+    tags=["[admin] bus"],
+    response_model=UpdateBusTypeResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": UpdateBusTypeResponseModel_ERR_404,
+        }
+    },
+)
+async def modify_bus_type(
+    id: int, params: UpdateBusTypeBodyParams, api_key: APIKey = Depends(get_api_key)
+):
+    con = connect()
+
+    bus_type = await get_bus_type_by_id(con, id)
+
+    if bus_type is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Type Not Found"
+        )
+
+    bus_type.name = params.name
+    new_type = update_bus_type(con, bus_type)
+
+    type_json = obj_to_json(new_type)
+
+    disconnect(con)
+
+    return {"type": type_json}
+
+
+@router.delete(
+    "/bus_type/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a Bus Type by ID",
+    tags=["[admin] bus"],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": DeleteBusTypeResponseModel_ERR_404,
+        }
+    },
+)
+async def remove_bus_type(id: int, api_key: APIKey = Depends(get_api_key)):
+    con = connect()
+
+    bus_type = await get_bus_type_by_id(con, id)
+
+    if bus_type is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Type Not Found"
+        )
+
+    remove_bus_type(con, bus_type)
+
+    disconnect(con)
 
 
 @router.get(
@@ -387,5 +561,215 @@ async def delete_bus_route(id: int, api_key: APIKey = Depends(get_api_key)):
         )
 
     remove_bus_route(con, route)
+
+    disconnect(con)
+
+
+@router.get(
+    "/bus_schedule",
+    summary="Get Details of All Bus Schedules",
+    tags=["bus"],
+    response_model=GetAllBusSchedulesResponseModel,
+)
+async def get_all_bus_schedules():
+    con = connect()
+
+    schedules = await get_bus_schedules(con)
+    schedules_json = obj_to_json(schedules)
+
+    disconnect(con)
+
+    return {"schedules": schedules_json}
+
+
+@router.get(
+    "/bus_schedule/{id}",
+    summary="Get Details of a Bus Schedule",
+    tags=["bus"],
+    response_model=GetBusScheduleResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": GetBusScheduleResponseModel_ERR_404,
+        }
+    },
+)
+async def get_bus_schedule(id: int):
+    con = connect()
+
+    schedule = await get_bus_schedule_by_id(con, id)
+    if schedule is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Schedule Not Found"
+        )
+
+    schedule_json = obj_to_json(schedule)
+
+    disconnect(con)
+
+    return {"schedule": schedule_json}
+
+
+@router.post(
+    "/bus_schedule",
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a New Bus Schedule",
+    tags=["[admin] bus"],
+    response_model=NewBusScheduleResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": NewBusScheduleResponseModel_ERR_404,
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad Request Error",
+            "model": NewBusScheduleResponseModel_ERR_400,
+        },
+    },
+)
+async def new_bus_schedule(
+    params: NewBusScheduleBodyParams, api_key: APIKey = Depends(get_api_key)
+):
+    con = connect()
+
+    route = await get_bus_route_by_id(con, params.route_id)
+    if route is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Route Not Found"
+        )
+
+    bus_type = await get_bus_type_by_id(con, params.bus_type_id)
+    if bus_type is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Type Not Found"
+        )
+
+    try:
+        schedule = await create_bus_schedule(
+            con,
+            route,
+            bus_type,
+            params.start_time,
+            params.end_time,
+            params.via_stops_times,
+        )
+    except ValueError:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid Time Format",
+        )
+
+    if schedule is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bus Schedule Already Exists",
+        )
+
+    disconnect(con)
+
+    schedule_json = obj_to_json(schedule)
+
+    return {"schedule": schedule_json}
+
+
+@router.put(
+    "/bus_schedule/{id}",
+    summary="Update Details of a Bus Schedule by ID",
+    tags=["[admin] bus"],
+    response_model=UpdateBusScheduleResponseModel,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": UpdateBusScheduleResponseModel_ERR_404,
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad Request Error",
+            "model": UpdateBusScheduleResponseModel_ERR_400,
+        },
+    },
+)
+async def modify_bus_schedule(
+    id: int, params: UpdateBusScheduleBodyParams, api_key: APIKey = Depends(get_api_key)
+):
+    con = connect()
+
+    schedule = await get_bus_schedule_by_id(con, id)
+    if schedule is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Schedule Not Found"
+        )
+
+    if params.route_id is not None:
+        route = await get_bus_route_by_id(con, params.route_id)
+        if route is None:
+            disconnect(con)
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Bus Route Not Found"
+            )
+        schedule.route = route
+
+    if params.bus_type_id is not None:
+        bus_type = await get_bus_type_by_id(con, params.bus_type_id)
+        if bus_type is None:
+            disconnect(con)
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Bus Type Not Found"
+            )
+        schedule.bus_type = bus_type
+
+    if params.start_time is not None:
+        schedule.start_time = params.start_time
+
+    if params.end_time is not None:
+        schedule.end_time = params.end_time
+
+    if params.via_stops_times is not None:
+        schedule.via_stop_times = params.via_stops_times
+
+    try:
+        schedule = await update_bus_schedule(con, schedule)
+    except ValueError:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid Time Format",
+        )
+
+    schedule_json = obj_to_json(schedule)
+
+    disconnect(con)
+
+    return {"schedule": schedule_json}
+
+
+@router.delete(
+    "/bus_schedule/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a Bus Schedule by ID",
+    tags=["[admin] bus"],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not Found Error",
+            "model": DeleteBusScheduleResponseModel_ERR_404,
+        }
+    },
+)
+async def delete_bus_schedule(id: int, api_key: APIKey = Depends(get_api_key)):
+    con = connect()
+
+    schedule = await get_bus_schedule_by_id(con, id)
+    if schedule is None:
+        disconnect(con)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Bus Schedule Not Found"
+        )
+
+    remove_bus_schedule(con, schedule)
 
     disconnect(con)
